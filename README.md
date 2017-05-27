@@ -25,6 +25,17 @@ Wait at least 30 minutes for some data to be downloaded and indexed in ES and th
 
 Uncheck `Index contains time-based events` checkbox, in the "Index Patterns" field, type `data.gov.ua-*` and then press "Create". Use kibana to query metadata and setup your visualizations.
 
+## Crawler only
+
+
+```
+# locally
+./run-crawler.sh
+
+# in production
+docker stack deploy -c deploy.yml
+```
+
 ## Kibana
 
 If you are already familiar with Kibana time range functionality, you may also leave time-based events checkbox checked and choose `@timestamp`, `created` or `changed` as the default timefield for `data.gov.ua-*` index.

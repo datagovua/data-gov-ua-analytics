@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  proxy:
+    image: mattes/rotating-proxy
+    ports:
+      - "5566:5566"
+      - "4444:4444"
+    environment:
+      - tors=25
+  crawler:
+    image: vanuan/data-gov-ua-crawler
+    volumes:
+      - /data:/data
+    working_dir: /src
+    command: sh -c 'yarn install && node app.js --cron "0 10 0 * * 6" --run'
+    depends_on:
+      - proxy

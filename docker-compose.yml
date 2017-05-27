@@ -8,12 +8,12 @@ services:
     environment:
       - tors=25
   crawler:
-    image: node:7.4
+    build: ./app/build
     volumes:
-      - ./app:/usr/src/crawler/app
-      - metadata:/usr/src/crawler/data
-    working_dir: /usr/src/crawler/app
-    command: node app.js --cron "0 10 0 * * 6" --run
+      - ./app:/src
+      - ./data:/data
+    working_dir: /src
+    command: sh -c 'yarn install && node app.js --cron "0 10 0 * * 6" --run'
     depends_on:
       - proxy
     environment:
@@ -29,7 +29,7 @@ services:
     image: logstash:5.1.1
     volumes:
       - ./logstash:/crawler/logstash
-      - metadata:/crawler/data
+      - ./data:/crawler/data
     command: bash -c "env GEM_HOME=/usr/share/logstash/vendor/bundle/jruby/1.9 /usr/share/logstash/vendor/jruby/bin/jruby -S gem install geocoder -v 1.4.1 && echo 'gem \"geocoder\", \"~> 1.4.1\"' >> /usr/share/logstash/Gemfile && logstash -f /crawler/logstash/metadata.conf"
     depends_on:
       - elasticsearch
@@ -42,7 +42,6 @@ services:
     depends_on:
       - elasticsearch
 volumes:
-  metadata: {}
   elasticsearch_config: {}
   elasticsearch_data: {}
   kibana_config: {}
