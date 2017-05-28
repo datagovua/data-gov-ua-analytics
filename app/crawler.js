@@ -126,7 +126,8 @@ const requestSingleMetadata = function requestSingleMetadata(dataset) {
     uri: dataset.view,
     json: true,
   }).catch({ statusCode: 500 }, handleMetadataError.bind(null, dataset.id))
-    .catch({ statusCode: 404 }, handleMetadataError.bind(null, dataset.id));
+    .catch({ statusCode: 404 }, handleMetadataError.bind(null, dataset.id))
+    .catch({ statusCode: 403 }, handleMetadataError.bind(null, dataset.id));
 };
 
 const requestMultipleMetadata = function requestMultipleMetadata(datasets) {
