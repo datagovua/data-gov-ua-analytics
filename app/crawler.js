@@ -5,6 +5,7 @@ const Promise = require('bluebird');
 const cheerio = require('cheerio');
 const retry = require('bluebird-retry');
 const fs = require('fs-bluebird');
+const xml2json = require('xml2json');
 
 const config = {
   structuredFormats: ['json', 'xml', 'csv', 'xls', 'xlsx', 'yaml'],
@@ -72,7 +73,7 @@ const tryRequestPageDatasets = function tryRequestPageDatasets(i) {
     const datasets = $(config.datasetLinkElement).toArray().map((elem) => {
       const link = $(elem).attr('href');
       const id = link.substr(link.lastIndexOf('/') + 1);
-      return { id, view: `http://data.gov.ua/view-dataset/dataset.json?dataset-id=${id}` };
+      return { id, view: `http://data.gov.ua/view-dataset/dataset.xml?dataset-id=${id}` };
     });
 
     if (!datasets.length) {
@@ -124,7 +125,7 @@ const requestSingleMetadata = function requestSingleMetadata(dataset) {
   log(dataset.view);
   return request({
     uri: dataset.view,
-    json: true,
+    transform: body => xml2json.toJson(body, { object: true }).result,
   }).catch({ statusCode: 500 }, handleMetadataError.bind(null, dataset.id))
     .catch({ statusCode: 404 }, handleMetadataError.bind(null, dataset.id))
     .catch({ statusCode: 403 }, handleMetadataError.bind(null, dataset.id));

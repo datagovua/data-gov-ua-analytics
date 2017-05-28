@@ -1,2 +1,4 @@
 metadata.json
 node_modules
+tmp_yarn_cache/
+data/

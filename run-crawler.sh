@@ -1,2 +1,3 @@
 #!/bin/bash
+docker-compose build crawler
 docker-compose run --rm crawler

@@ -1,2 +1,2 @@
-FROM node:7.4-alpine
-RUN npm install -g yarn
+FROM node:7.10-alpine
+RUN apk add --update python build-base

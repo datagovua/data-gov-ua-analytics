@@ -1,5 +1,5 @@
-FROM node:7.4-alpine
+FROM node:7.10-alpine
 ADD . /src
 WORKDIR /src
-RUN cd /src && npm install -g yarn && yarn install
+RUN apk add --update python build-base && cd /src && yarn install
 CMD ["node", "app.js", "--cron", "0 10 0 * * 6", "--run"]
