@@ -1,12 +1,14 @@
-const http = require('http');
-const HttpProxyAgent = require('http-proxy-agent');
 const program = require('commander');
 const CronJob = require('cron').CronJob;
-const crawler = require('./crawler');
+const http = require('http');
+const HttpProxyAgent = require('http-proxy-agent');
+let crawler = require('./crawler');
+const crawler2 = require('./crawler2');
 
 
-// Initialize global agent to use proxy configured with the http_proxy environment variable
-const proxy = process.env.http_proxy;
+
+// Initialize global agent to use proxy configured with environment variables
+const proxy = process.env.PROXY_URL;
 if (proxy) {
   http.globalAgent = new HttpProxyAgent(proxy);
 }
@@ -18,7 +20,12 @@ program
   .option('-b, --bulk', 'Use bulk mode crawling strategy')
   .option('-c, --cron <str>', 'Use cron string to reschedule batch crawling continuously. Only batch mode supported')
   .option('-r, --run', 'If cron parameter specified also runs job immediately after the startup')
+  .option('-o, --old', 'Run old crawler')
   .parse(process.argv);
+
+if(!program.old) {
+  crawler = crawler2;
+}
 
 if (!program.cron) {
   if (program.bulk) {

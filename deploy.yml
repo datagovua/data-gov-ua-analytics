@@ -2,13 +2,14 @@ version: '3.1'
 services:
   proxy:
     image: mattes/rotating-proxy
-    ports:
-      - "5566:5566"
-      - "4444:4444"
     environment:
       - tors=25
   crawler:
     image: vanuan/data-gov-ua-crawler
+    environment:
+      - PROXY_URL=http://proxy:5566
+      - DELAY=10000
+      - CONCURRENCY=1
     volumes:
       - /data:/data
     working_dir: /src
