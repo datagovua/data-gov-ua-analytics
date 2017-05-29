@@ -56,7 +56,9 @@ The app uses [http-proxy-agent](https://github.com/TooTallNate/node-http-proxy-a
 
 
 ## Alternatives
-https://github.com/mishkinstvo/DataGovUaParser
+
+* Java https://github.com/mishkinstvo/DataGovUaParser
+* R https://github.com/andriy-gazin/datagovua
 
 ## License
 
