@@ -92,6 +92,13 @@ const createCrawler = (config, pusher) => {
       crawler.queueURL(pageQueue.pop());
     }
   });
+
+  crawler.on("fetcherror", function(queueItem, response) {
+    console.log("ERROR for %s", decodeURI(queueItem.url));
+    console.log("ERROR is %s", response.statusCode);
+    const force = true;
+    crawler.queueURL(queueItem.url, undefined, force);
+  });
   
   crawler.addFetchCondition(function(queueItem, referrerQueueItem, callback) {
     let fetch = false;
