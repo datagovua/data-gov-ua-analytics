@@ -20,10 +20,10 @@ program
   .option('-b, --bulk', 'Use bulk mode crawling strategy')
   .option('-c, --cron <str>', 'Use cron string to reschedule batch crawling continuously. Only batch mode supported')
   .option('-r, --run', 'If cron parameter specified also runs job immediately after the startup')
-  .option('-o, --old', 'Run old crawler')
+  .option('-e, --experimental', 'Run new crawler')
   .parse(process.argv);
 
-if(!program.old) {
+if(program.experimental) {
   crawler = crawler2;
 }
 

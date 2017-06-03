@@ -9,7 +9,10 @@ const xml2json = require('xml2json');
 const parser = require('./parser');
 const parsePagesCount = parser.pagesCount;
 const parseDatasetIds = parser.datasetIds;
+
 const createConfig = require('./config');
+const createOutputStream = require('./pusher');
+
 let config;
 
 const log = console.log;
@@ -69,14 +72,15 @@ const handleMetadataError = function handleMetadataError(datasetId, err) {
   return { dataset_id: datasetId, statusCode: err.statusCode, error: message };
 };
 
-const requestSingleMetadata = function requestSingleMetadata(dataset) {
-  log(dataset.xmlUrl);
+const requestSingleMetadata = function requestSingleMetadata(datasetId) {
+  const url = config.datasetXmlUrl + datasetId;
+  log(url);
   return request({
-    uri: dataset.xmlUrl,
+    uri: url,
     transform: body => xml2json.toJson(body, { object: true }).result,
-  }).catch({ statusCode: 500 }, handleMetadataError.bind(null, dataset.id))
-    .catch({ statusCode: 404 }, handleMetadataError.bind(null, dataset.id))
-    .catch({ statusCode: 403 }, handleMetadataError.bind(null, dataset.id));
+  }).catch({ statusCode: 500 }, handleMetadataError.bind(null, datasetId))
+    .catch({ statusCode: 404 }, handleMetadataError.bind(null, datasetId))
+    .catch(rpErrors.TransformError, handleMetadataError.bind(null, datasetId));
 };
 
 const requestMultipleMetadata = function requestMultipleMetadata(datasets) {
@@ -88,10 +92,15 @@ const requestMultipleMetadata = function requestMultipleMetadata(datasets) {
   , { concurrency: options.concurrency });
 };
 
+let pusher;
+
 const appendToFile = function appendToFile(datasets) {
-  const promise = fs.appendFileAsync(config.metadataFile, `\n${JSON.stringify(datasets)}`, 'utf8');
-  log('Metadata appended to', config.metadataFile);
-  return promise;
+  if(!pusher) {
+    pusher = createOutputStream(config.metadataCsvFile);
+  }
+  datasets.forEach(dataset => pusher.push(dataset));
+  log('Appending to', config.metadataCsvFile);
+  return new Promise(resolve => resolve());
 };
 
 const writeToFile = function writeToFile(datasets) {
@@ -111,11 +120,13 @@ const strategies = {
 
   // TODO Add an ability to pass options
   batch: () => requestPagesCount()
-    .then(pagesCount =>
-      requestDatasetsByPage(pagesCount, datasets =>
-        Promise.resolve(logDatasets(datasets))
+    .then(pagesCount => {
+      return requestDatasetsByPage(pagesCount, datasets => {
+        return Promise.resolve(logDatasets(datasets))
           .then(requestMultipleMetadata)
-          .then(appendToFile))),
+          .then(appendToFile)
+      });
+    }).then(() => pusher && pusher.end()),
 };
 
 module.exports = strategies;

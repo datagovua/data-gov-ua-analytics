@@ -1,3 +1,7 @@
+const rpErrors = require('request-promise/errors');
+const NoDataFoundError = require('./errors').NoDataFoundError;
+
+
 const createConfig = () => ({
   structuredFormats: ['json', 'xml', 'csv', 'xls', 'xlsx', 'yaml'],
   catalogUrl: 'http://data.gov.ua/datasets',
@@ -8,27 +12,27 @@ const createConfig = () => ({
   metadataCsvFile: `../data/metadata-${new Date().toISOString()}.csv`,
   retryOptions: {
     max_tries: 480,
-    interval: 10 * 1000, // 10 seconds
-    max_interval: 15 * 60 * 1000, // 15 mins
+    interval: parseInt(process.env.DELAY) || 10000,
+    max_interval: parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
     backoff: 2,
     predicate: e => e instanceof rpErrors.RequestError
       || e instanceof rpErrors.StatusCodeError
       || e instanceof NoDataFoundError,
   },
-  delay: process.env.DELAY || 10000,
-  concurrency: process.env.CONCURRENCY || 1,
+  delay: parseInt(process.env.DELAY) || 10000,
+  concurrency: parseInt(process.env.CONCURRENCY) || 1,
   catalogPageRequestQueue: {
-    concurrency: 1,
+    concurrency: parseInt(process.env.CONCURRENCY) || 1,
     delay: {
-      max: 15000,
-      min: 10000,
+      max: parseInt(process.env.DELAY) || 15000,
+      min: parseInt(process.env.DELAY) || 10000,
     },
   },
   metadataRequestQueue: {
-    concurrency: 1,
+    concurrency: parseInt(process.env.CONCURRENCY) || 1,
     delay: {
-      max: 15000,
-      min: 10000,
+      max: parseInt(process.env.DELAY) || 15000,
+      min: parseInt(process.env.DELAY) || 10000,
     },
   },
 });

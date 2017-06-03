@@ -1,20 +1,11 @@
-const fs = require('fs');
-const Transform = require('stream').Transform;
 const Crawler = require("simplecrawler");
-const stringify = require('csv-stringify');
 
 const NoDataFoundError = require('./errors').NoDataFoundError;
 const parser = require('./parser');
 const createConfig = require('./config');
 const log = console.log;
+const createOutputStream = require('./pusher');
 
-const createOutputStream = (filename) => {
-  const writeStream = fs.createWriteStream(filename);
-  const stringifyStream = stringify({ header: true });
-  const pusher = new Transform({ objectMode: true })
-  pusher.pipe(stringifyStream).pipe(writeStream);
-  return pusher;
-}
 
 const start = () => {
   const config = createConfig();
