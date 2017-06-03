@@ -66,7 +66,7 @@ const logDatasets = function logDatasets(datasets) {
   return datasets;
 };
 
-const handleCatalogPageEror = function handleCatalogPageError(page, error) {
+const handleCatalogPageError = function handleCatalogPageError(page, error) {
   log('Catalog page ' + page + ' failed: ' + error.message);
 };
 
