@@ -46,7 +46,7 @@ const requestDatasetsByPage = function requestDatasetsByPage(pagesCount, onPageD
   const options = config.catalogPageRequestQueue;
   const randomDelay = randomRange.bind(null, options.delay.min, options.delay.max);
   return Promise.map(pageNumbers, (i) => {
-    const page = i + 1;
+    const page = i;
     log(`Processing page ${page} of ${pagesCount} (not in order).`);
 
     const tryRequestPageDatasetsI = tryRequestPageDatasets.bind(null, page);
