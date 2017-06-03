@@ -47,7 +47,7 @@ const requestDatasetsByPage = function requestDatasetsByPage(pagesCount, onPageD
   const randomDelay = randomRange.bind(null, options.delay.min, options.delay.max);
   return Promise.map(pageNumbers, (i) => {
     const page = i;
-    log(`Processing page ${page} of ${pagesCount} (not in order).`);
+    log(`Processing page ${page + 1} of ${pagesCount} (not in order).`);
 
     const tryRequestPageDatasetsI = tryRequestPageDatasets.bind(null, page);
     return Promise.delay(randomDelay())
