@@ -11,7 +11,7 @@ const createConfig = () => ({
   metadataFile: `../data/metadata-${new Date().toISOString()}.json`,
   metadataCsvFile: `../data/metadata-${new Date().toISOString()}.csv`,
   retryOptions: {
-    max_tries: 480,
+    max_tries: 30,
     interval: parseInt(process.env.DELAY) || 10000,
     max_interval: parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
     backoff: 2,

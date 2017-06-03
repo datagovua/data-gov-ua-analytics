@@ -12,6 +12,8 @@ const parseDatasetIds = parser.datasetIds;
 
 const createConfig = require('./config');
 const createOutputStream = require('./pusher');
+const NoDataFoundError = require('./errors').NoDataFoundError;
+
 
 let config;
 
@@ -50,8 +52,9 @@ const requestDatasetsByPage = function requestDatasetsByPage(pagesCount, onPageD
     const tryRequestPageDatasetsI = tryRequestPageDatasets.bind(null, page);
     return Promise.delay(randomDelay())
       .then(() => retry(tryRequestPageDatasetsI, config.retryOptions))
-      .then(onPageDone);
-  }, { concurrency: options.concurrency });
+      .then(onPageDone)
+      .catch(error => handleCatalogPageError(page, error);
+  }, { concurrency: 1 });
 };
 
 const flattenDatasets = function flattenDatasets(prev, cur) {
@@ -61,6 +64,10 @@ const flattenDatasets = function flattenDatasets(prev, cur) {
 const logDatasets = function logDatasets(datasets) {
   log('Found', datasets.length, 'datasets');
   return datasets;
+};
+
+const handleCatalogPageEror = function handleCatalogPageError(page, error) {
+  log('Catalog page ' + page + ' failed: ' + error.message));
 };
 
 const handleMetadataError = function handleMetadataError(datasetId, err) {
