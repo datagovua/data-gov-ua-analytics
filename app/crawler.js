@@ -53,7 +53,7 @@ const requestDatasetsByPage = function requestDatasetsByPage(pagesCount, onPageD
     return Promise.delay(randomDelay())
       .then(() => retry(tryRequestPageDatasetsI, config.retryOptions))
       .then(onPageDone)
-      .catch(error => handleCatalogPageError(page, error);
+      .catch(error => handleCatalogPageError(page, error));
   }, { concurrency: 1 });
 };
 
@@ -67,7 +67,7 @@ const logDatasets = function logDatasets(datasets) {
 };
 
 const handleCatalogPageEror = function handleCatalogPageError(page, error) {
-  log('Catalog page ' + page + ' failed: ' + error.message));
+  log('Catalog page ' + page + ' failed: ' + error.message);
 };
 
 const handleMetadataError = function handleMetadataError(datasetId, err) {
