@@ -1,0 +1,3 @@
+#!/bin/bash
+docker-compose build crawler
+docker-compose run --service-ports --rm crawler sh -c 'export PATH=$PATH:/src/node_modules/.bin; jest --watch'

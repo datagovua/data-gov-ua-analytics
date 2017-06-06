@@ -16,8 +16,8 @@ services:
       - proxy
     environment:
       - PROXY_URL=http://proxy:5566
-      - DELAY=10000
-      - CONCURRENCY=1
+      - DELAY=1000
+      - CONCURRENCY=3
     ports:
       - "127.0.0.1:9229:9229"
       - "127.0.0.1:9222:9222"
