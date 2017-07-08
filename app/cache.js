@@ -15,7 +15,6 @@ class Cache {
   }
 
   save(url, content) {
-console.log(url)
     return storage.setItem(url, content)
            .then(() => storage.getItem(url));
   }

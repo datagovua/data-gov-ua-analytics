@@ -11,14 +11,18 @@ if(proxy) {
 }
 const domain = 'http://data.gov.ua';
 
-let retryOptions;
-let cacheLocation;
-let cache;
+module.exports = function() {
+  return new Requester();
+}
 
-module.exports = {
+class Requester {
+
+  constructor() {
+  }
+
   init(delay, cacheLocation) {
-    cache = new Cache(cacheLocation || '/data/cache2/');
-    retryOptions = {
+    this.cache = new Cache(cacheLocation || '/data/cache2/');
+    this.retryOptions = {
       max_tries: 30,
       interval: delay || parseInt(process.env.DELAY) || 10000,
       max_interval: delay || parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
@@ -26,22 +30,46 @@ module.exports = {
       predicate: e => e instanceof rpErrors.RequestError
         || (e instanceof rpErrors.StatusCodeError && e.statusCode !== 404),
     };
-    return cache.init();
-  },
+    return this.cache.init();
+  }
 
   request(path) {
-    return cache.retrieve(path).then((content) => {
-      if(content) {
+    return this.cache.retrieve(path).then((response) => {
+      if(response) {
         console.log(path + ' from cache');
-        return content;
+        if(response.statusCode === 200) {
+          return response.content;
+        } else {
+          throw {
+            path,
+            content: response.content,
+            statusCode: response.statusCode,
+          };
+        }
       } else {
-        return retry(() => { return request(domain + path) }, retryOptions).then((content) => {
-            return cache.save(path, content);
+        console.log(path + ' live');
+        return retry(() => { return request(domain + path); }, this.retryOptions)
+        .then((content) => {
+          return this.cache.save(path, { content, statusCode: 200 })
+          .then(() => {
+            return content;
           });
+        })
+        .catch(e => {
+console.log(e)
+          return this.cache.save(path, {
+            content: e.response.body,
+            statusCode: e.response.statusCode,
+          })
+          .then(() => {
+            throw { path, content: e.response.body, statusCode: e.response.statusCode };
+          });
+        });
       }
     });
-  },
+  }
+
   finish() {
-    return cache.finish();
+    return this.cache.finish();
   }
 };

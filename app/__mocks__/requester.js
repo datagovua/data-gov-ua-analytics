@@ -6,17 +6,18 @@ const request = function request(url) {
   });
 };
 
-module.exports = {
-  mockSetUp(mock) {
-    urlResolveReject = mock;
-  },
-  init() {
-    return new Promise(resolve => resolve());
-  },
-  request,
-  finish() {
-    urlResolveReject = (url, resolve, reject) => resolve();
-    return new Promise(resolve => resolve())
-  }
-};
-
+module.exports = function() {
+  return {
+    mockSetUp(mock) {
+      urlResolveReject = mock;
+    },
+    init() {
+      return new Promise(resolve => resolve());
+    },
+    request,
+    finish() {
+      urlResolveReject = (url, resolve, reject) => resolve();
+      return new Promise(resolve => resolve())
+    }
+  };
+}

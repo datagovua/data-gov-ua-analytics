@@ -18,10 +18,12 @@ let request = function request(url) {
     if(response.statusCode == 200) {
       resolve(body);
     } else {
-      reject(new rpErrors.StatusCodeError(response.statusCode, body));
+      reject(new rpErrors.StatusCodeError(response.statusCode, body, null, response));
     }
   });
 };
+
+request.defaults = function() { return request };
 
 request.setup = function(mock) {
   currentMock = mock;

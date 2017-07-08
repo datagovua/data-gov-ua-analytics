@@ -4,8 +4,10 @@ jest.mock('./requester');
 const fs = require('fs');
 
 const crawlNodes = require('./crawlNodes');
-const requester = require('./requester');
+const createRequester = require('./requester');
 const saver = require('./saver');
+
+const requester = createRequester();
 
 function* times(count, value) {
   let curr = count;
@@ -32,7 +34,7 @@ describe('crawlNodes', () => {
         reject({code: 404});
       }
     })
-    return crawlNodes(13, 11).then(errors => {
+    return crawlNodes([13, 12, 11]).then(errors => {
       expect(errors).toEqual([...times(2, {code: 404})]);
       expect(saver.save).toBeCalledWith(sampleDataset);
     });

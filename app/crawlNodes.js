@@ -1,88 +1,60 @@
 const cheerio = require('cheerio');
 const Promise = require('bluebird')
 
-const requester = require('./requester');
+const createRequester = require('./requester');
 const saver = require('./saver');
+const parser = require('./parser');
+
+const requester = createRequester();
 
 function visited(nodeId) {
   return false;
 }
 
-function parseLink(dom, name) {
-  return dom('link').filter((_, el) => {
-    return dom(el).attr('rel') === name;
-  }).attr('href');
+
+function getNode(nodeId) {
+  return requester.request(`/node/${nodeId}`)
+    .then(res => cheerio.load(res))
+    .then(dom => ({
+      node_id: parser.parseNodeId(dom),
+      canonical: parser.parseCanonical(dom),
+      revision_id: parser.parseRevisionId(dom),
+      dataset_id: parser.parseDatasetId(dom),
+    }));
 }
 
-function parseShort(dom) {
-  return parseLink(dom, 'shortlink');
-}
 
-function parseCanonical(dom) {
-  return parseLink(dom, 'canonical');
-}
-
-function parseDatasetId(dom) {
-  let url = parseCanonical(dom);
-  let match = url.match(/^http:\/\/(?:.*)\/passport\/(.*)$/)
-  return match ? match[1] : null;
-}
-
-function parseNodeId(dom) {
-  let url = parseShort(dom);
-  let match = url.match(/^http:\/\/(?:.*)\/node\/(.*)$/)
-  return match ? parseInt(match[1]) : null;
-}
-
-function parseRevisionId(dom) {
-  return parseInt(dom('a').filter((_, el) => {
-    let aTitle = 'Вставити цей замінник у вашу форму';
-    return dom(el).attr('title') === aTitle;
-  }).text());
-}
-
-module.exports = function crawlNodes(lastNodeId, firstNodeId) {
+module.exports = function crawlNodes(idArray) {
 
   let errors = [];
   saver.init();
   return requester.init().then(() => {
 
     return new Promise((resolve, reject) => {
-
       function scheduleNext(nodeId) {
-        let nextNodeId = nodeId - 1;
-        if(nextNodeId < firstNodeId) {
+        if(!nodeId) {
           saver.finish()
             .then(() => requester.finish())
             .then(() => resolve(errors));
-        } else if(visited(nextNodeId)) {
-          process.nextTick(() => scheduleNext(nextNodeId - 1));
+        } else if(visited(nodeId)) {
+          process.nextTick(() => scheduleNext(idArray.pop()));
         } else {
-          process.nextTick(() => getNode(nextNodeId))
+          process.nextTick(() => {
+            return getNode(nodeId)
+              .then(node => saver.save(node))
+              .then(() => {
+                scheduleNext(idArray.pop());
+              })
+              .catch(e => {
+                errors.push(e);
+                scheduleNext(idArray.pop());
+              })
+          });
         }
       }
-      
-      function getNode(nodeId) {
-        requester.request(`/node/${nodeId}`)
-          .then(res => cheerio.load(res))
-          .then(dom => ({
-            node_id: parseNodeId(dom),
-            canonical: parseCanonical(dom),
-            revision_id: parseRevisionId(dom),
-            dataset_id: parseDatasetId(dom),
-          }))
-          .then(node => saver.save(node))
-          .then(() => {
-            scheduleNext(nodeId);
-          })
-          .catch(e => {
-            errors.push(e);
-            scheduleNext(nodeId);
-          });
-      }
+      scheduleNext(idArray.pop());
+    });
 
-      scheduleNext(lastNodeId + 1);
-    })
   });
 
 }

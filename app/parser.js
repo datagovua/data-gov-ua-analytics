@@ -40,7 +40,44 @@ const datasetIds = function (page) {
   return datasetIds;
 };
 
+function parseLink(dom, name) {
+  return dom('link').filter((_, el) => {
+    return dom(el).attr('rel') === name;
+  }).attr('href');
+}
+
+function parseShort(dom) {
+  return parseLink(dom, 'shortlink');
+}
+
+function parseCanonical(dom) {
+  return parseLink(dom, 'canonical');
+}
+
+function parseDatasetId(dom) {
+  let url = parseCanonical(dom);
+  let match = url.match(/^http:\/\/(?:.*)\/passport\/(.*)$/)
+  return match ? match[1] : null;
+}
+
+function parseNodeId(dom) {
+  let url = parseShort(dom);
+  let match = url.match(/^http:\/\/(?:.*)\/node\/(.*)$/)
+  return match ? parseInt(match[1]) : null;
+}
+
+function parseRevisionId(dom) {
+  return parseInt(dom('a').filter((_, el) => {
+    let aTitle = 'Вставити цей замінник у вашу форму';
+    return dom(el).attr('title') === aTitle;
+  }).text());
+}
+
 module.exports = {
   pagesCount,
   datasetIds,
+  parseRevisionId,
+  parseNodeId,
+  parseDatasetId,
+  parseCanonical,
 }
