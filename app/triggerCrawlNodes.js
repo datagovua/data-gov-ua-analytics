@@ -1,3 +1,11 @@
+/**
+ * Input:
+ * - http fetch /datasets?sort_bef_combine=created%20DESC
+ * - http cache
+ * - http delay
+ * Output:
+ * - data/nodes.csv: node_id, canonical, revision_id, dataset_id
+ */
 const cheerio = require('cheerio');
 const url = require('url');
 

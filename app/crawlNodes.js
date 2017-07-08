@@ -1,3 +1,7 @@
+/**
+ * Input: nodeId
+ * Output: nodes.csv: (node_id, canonical, revision_id, dataset_id)
+ */
 const cheerio = require('cheerio');
 const Promise = require('bluebird')
 
