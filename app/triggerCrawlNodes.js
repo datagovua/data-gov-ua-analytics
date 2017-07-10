@@ -14,13 +14,10 @@ const createRequester = require('./requester');
 const parser = require('./parser');
 
 let lastKnownNode = 92807;
-let firstKnownNode = 414; // 361
+let firstKnownNode = 407; // 361
 const testNodeId = 416;
 
-//crawlNodes(lastKnownNode, firstKnownNode);
-
 const requester = createRequester();
-
 
 function* interval(min, max) {
   let curr = max;
@@ -101,7 +98,7 @@ getMissing().then(nodeIds => {
     if(e.statusCode !== undefined) {
       console.log(e.path, e.statusCode);
     } else {
-//      console.log(e);
+      console.log(e);
     }
   });
 })
