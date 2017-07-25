@@ -4,6 +4,12 @@ services:
     image: mattes/rotating-proxy
     environment:
       - tors=25
+  rethinkdb:
+    image: 'vanuan/rethinkdb-alpine'
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - ./data/rethinkdb:/data
   crawler:
     build: ./app/build
     volumes:
@@ -14,6 +20,7 @@ services:
     command: sh -c 'yarn install && node app.js --cron "0 10 0 * * 6" --run'
     depends_on:
       - proxy
+      - rethinkdb
     environment:
       - PROXY_URL=http://proxy:5566
       - DELAY=1000

@@ -30,6 +30,7 @@
     "node-persist": "^2.0.11",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
+    "rethinkdb": "^2.3.3",
     "simplecrawler": "^1.1.2",
     "xml2json": "^0.11.0"
   },

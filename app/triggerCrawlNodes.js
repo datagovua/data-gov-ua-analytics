@@ -15,7 +15,7 @@ const parser = require('./parser');
 
 let lastKnownNode = 92807;
 let firstKnownNode = 407; // 361
-const testNodeId = 416;
+const testNodeId = 420;
 
 const requester = createRequester();
 
