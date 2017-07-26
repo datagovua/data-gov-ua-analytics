@@ -63,7 +63,6 @@ class Requester {
           });
         })
         .catch(e => {
-console.log(e)
           return this.cache.save(path, {
             content: e.response.body,
             statusCode: e.response.statusCode,
