@@ -6,6 +6,7 @@ const HttpProxyAgent = require('http-proxy-agent');
 const Cache = require('./cache');
 
 const proxy = process.env.PROXY_URL;
+const DELAY = parseInt(process.env.DELAY);
 if(proxy) {
   request = request.defaults({'proxy': proxy})
 }
@@ -13,6 +14,10 @@ const domain = 'http://data.gov.ua';
 
 module.exports = function() {
   return new Requester();
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 class Requester {
@@ -48,7 +53,9 @@ class Requester {
         }
       } else {
         console.log(path + ' live');
-        return retry(() => { return request(domain + path); }, this.retryOptions)
+        return delay(DELAY).then(() => {
+          return retry(() => { return request(domain + path); }, this.retryOptions)
+        })
         .then((content) => {
           return this.cache.save(path, { content, statusCode: 200 })
           .then(() => {
