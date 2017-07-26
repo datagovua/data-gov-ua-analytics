@@ -21,19 +21,21 @@ function getRevisionsToFetch() {
   });
 }
 
-getRevisionsToFetch().then(revisions => {
-  return crawlMetadata(revisions);
-})
-.then(errors => {
-  if(errors.length) {
-    console.log("Permanent errors:")
-  }
-  errors.forEach(function(e) {
-    if(e.statusCode !== undefined) {
-      console.log(e.path, e.statusCode);
-    } else {
-      console.log(e);
+module.exports = function() {
+  return getRevisionsToFetch().then(revisions => {
+    return crawlMetadata(revisions);
+  })
+  .then(errors => {
+    if(errors.length) {
+      console.log("Permanent errors:")
     }
-  });
-})
-.catch(e => console.error('Failure:', e));
+    errors.forEach(function(e) {
+      if(e.statusCode !== undefined) {
+        console.log(e.path, e.statusCode);
+      } else {
+        console.log(e);
+      }
+    });
+  })
+  .catch(e => console.error('Failure:', e));
+}

@@ -44,7 +44,7 @@ module.exports = function crawlNodes(idArray) {
           process.nextTick(() => scheduleNext(idArray.pop()));
         } else {
           process.nextTick(() => {
-            return getNode(nodeId)
+            getNode(nodeId)
               .then(node => saver.save(node))
               .then(() => {
                 scheduleNext(idArray.pop());

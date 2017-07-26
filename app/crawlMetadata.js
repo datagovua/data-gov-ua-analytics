@@ -79,6 +79,7 @@ function createSaver() {
     createIndexes() {
       return this.createIndex('revisions', 'node_id')
         .then(() => this.createIndex('revisions', 'organization_id'))
+        .then(() => this.createIndex('files', 'revision_id'))
     },
 
     createIndex(tableName, indexName) {

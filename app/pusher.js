@@ -7,7 +7,7 @@ const createOutputStream = (filename) => {
   const stringifyStream = stringify({ header: true });
   const pusher = new Transform({ objectMode: true })
   pusher.pipe(stringifyStream).pipe(writeStream);
-  return pusher;
+  return { pusher, onFinish(cb) { writeStream.on('finish', cb); } };
 }
 module.exports = createOutputStream;
 

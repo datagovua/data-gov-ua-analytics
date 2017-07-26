@@ -1,18 +1,23 @@
 const createOutputStream = require('./pusher');
-let pusher;
+let stream;
 
 module.exports = {
   init(filename) {
     if(filename) {
-      pusher = createOutputStream(filename);
+      stream = createOutputStream(filename);
     } else {
-      pusher = createOutputStream('/data/nodes.csv');
+      stream = createOutputStream('/data/nodes.csv');
     }
   },
   save(node) {
-    return new Promise(resolve => {pusher.push(node); resolve();});
+    return new Promise(resolve => {stream.pusher.push(node); resolve();});
   },
   finish() {
-    return new Promise(resolve => {pusher.end(); resolve();});
+    return new Promise(resolve => {
+      stream.pusher.end();
+      stream.onFinish(function () {
+        resolve();
+      });
+    });
   }
 };
