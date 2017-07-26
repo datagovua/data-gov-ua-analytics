@@ -33,7 +33,8 @@ class Requester {
       max_interval: delay || parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
       backoff: 2,
       predicate: e => e instanceof rpErrors.RequestError
-        || (e instanceof rpErrors.StatusCodeError && e.statusCode !== 404),
+        || (e instanceof rpErrors.StatusCodeError &&
+            e.statusCode !== 404 && e.statusCode !== 403),
     };
     return this.cache.init();
   }
