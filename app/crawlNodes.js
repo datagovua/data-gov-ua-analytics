@@ -27,6 +27,35 @@ function getNode(nodeId) {
     }));
 }
 
+function delay(timeout) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, timeout);
+  });
+}
+
+function scheduleNext(nodeId, idArray, errors, resolve, reject) {
+  delay(1).then(() => {
+    if(!nodeId) {
+      saver.finish()
+        .then(() => requester.finish())
+        .then(() => resolve(errors));
+    } else if(visited(nodeId)) {
+      process.nextTick(() => scheduleNext(idArray.pop(), idArray, errors, resolve, reject));
+    } else {
+      process.nextTick(() => {
+        getNode(nodeId)
+          .then(node => saver.save(node))
+          .then(() => {
+            scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
+          })
+          .catch(e => {
+            errors.push(e);
+            scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
+          });
+      });
+    }
+  });
+}
 
 module.exports = function crawlNodes(idArray) {
 
@@ -35,28 +64,7 @@ module.exports = function crawlNodes(idArray) {
   return requester.init().then(() => {
 
     return new Promise((resolve, reject) => {
-      function scheduleNext(nodeId) {
-        if(!nodeId) {
-          saver.finish()
-            .then(() => requester.finish())
-            .then(() => resolve(errors));
-        } else if(visited(nodeId)) {
-          process.nextTick(() => scheduleNext(idArray.pop()));
-        } else {
-          process.nextTick(() => {
-            getNode(nodeId)
-              .then(node => saver.save(node))
-              .then(() => {
-                scheduleNext(idArray.pop());
-              })
-              .catch(e => {
-                errors.push(e);
-                scheduleNext(idArray.pop());
-              })
-          });
-        }
-      }
-      scheduleNext(idArray.pop());
+      scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
     });
 
   });
