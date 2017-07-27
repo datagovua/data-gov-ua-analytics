@@ -23,3 +23,11 @@ services:
     command: sh -c 'yarn install && node crawlInitial'
     depends_on:
       - proxy
+      - rethinkdb
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 512M
+

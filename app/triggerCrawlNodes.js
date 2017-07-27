@@ -1,7 +1,7 @@
 /**
  * Input:
  * - http fetch /datasets?sort_bef_combine=created%20DESC
- * - http cache
+ * - http cache (rethinkdb)
  * - http delay
  * Output:
  * - data/nodes.csv: node_id, canonical, revision_id, dataset_id
@@ -103,5 +103,4 @@ module.exports = function () {
       }
     });
   })
-  .catch(e => console.error('Failure:', e));
 }

@@ -26,7 +26,7 @@ class Requester {
   }
 
   init(delay, cacheLocation) {
-    this.cache = new Cache(cacheLocation || '/data/cache2/');
+    this.cache = new Cache();
     this.retryOptions = {
       max_tries: 30,
       interval: delay || parseInt(process.env.DELAY) || 10000,
@@ -64,6 +64,7 @@ class Requester {
           });
         })
         .catch(e => {
+          if(!e.response) throw e;
           return this.cache.save(path, {
             content: e.response.body,
             statusCode: e.response.statusCode,

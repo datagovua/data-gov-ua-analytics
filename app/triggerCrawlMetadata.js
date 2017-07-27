@@ -37,5 +37,4 @@ module.exports = function() {
       }
     });
   })
-  .catch(e => console.error('Failure:', e));
 }

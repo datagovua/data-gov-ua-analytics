@@ -6,4 +6,6 @@ triggerCrawlNodes()
 .then(() => triggerCrawlRevisions())
 .then(() => triggerCrawlMetadata())
 .then(() => console.log('all done'))
-.catch(e => console.log(e));
+.catch(e => {
+   console.log('Unhandled error', e.stack);
+});

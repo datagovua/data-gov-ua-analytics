@@ -34,9 +34,12 @@ module.exports = function() {
       if(e.statusCode !== undefined) {
         console.log(e.path, e.statusCode);
       } else {
-        console.log(e);
+        if(e.path) {
+          console.log(e.path)
+        } else {
+          console.log(e);
+        }
       }
     });
   })
-  .catch(e => console.error('Failure:', e));
 }

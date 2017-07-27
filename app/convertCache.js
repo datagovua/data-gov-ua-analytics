@@ -82,7 +82,8 @@ function prepareDb() {
     .then(() => conn)
   })
   .then(conn => { conn.use('mirror'); return conn; })
-  .then(conn => { createTable(conn, 'cache', 'url'); return conn; })
+  .then(conn => { return createTable(conn, 'cache', 'url').then(() => conn); })
+
 }
 
 
