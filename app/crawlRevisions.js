@@ -1,15 +1,17 @@
 /**
- * Input: node: node_id, revision_id, dataset_id
+ * Input: nodes rethinkdb table: node_id, dataset_id
  * Output: revisions.csv: (revision_id, date, node_id, dataset_id)
  */
 const cheerio = require('cheerio');
 const Promise = require('bluebird')
 
 const createRequester = require('./requester');
-const saver = require('./saver');
+const createSaver = require('./dbSaver');
 const parser = require('./parser');
 
 const requester = createRequester();
+
+let saver;
 
 function visited(node) {
   return false;
@@ -42,12 +44,12 @@ function parseDate(text) {
 
 function parseRevisions(dom, node) {
   // TODO add a parameter whether should fetch all or only new revisions
-  const last_revision_id = node.revision_id;
+//  const last_revision_id = node.revision_id;
   const revisions = dom('.field-content a').map((i, el) => {
     let parsed = parseUrl(dom(el).attr('href'))
     let text = dom(el).text();
     let date = parseDate(text);
-    return { revision_id: parsed.revision_id, date, node_id: node.node_id, dataset_id: node.dataset_id };
+    return { revision_id: parseInt(parsed.revision_id), date, node_id: parseInt(node.node_id), dataset_id: node.dataset_id };
   }).get();
   const hasNext = !!dom('.pager-next a').attr('href');
   return { revisions: revisions, hasNext: hasNext };
@@ -81,8 +83,10 @@ function getRevisions(node) {
 
 module.exports = function crawlRevisions(itemArray) {
   let errors = [];
-  saver.init('/data/revisions.csv');
-  return requester.init().then(() => {
+  saver = createSaver();
+  return saver.init()
+  .then(() => requester.init())
+  .then(() => {
     return new Promise((resolve, reject) => {
       function scheduleNext(itemArray) {
         let item = itemArray.shift();
@@ -95,7 +99,7 @@ module.exports = function crawlRevisions(itemArray) {
         } else {
           process.nextTick(() => {
             return getRevisions(item)
-              .then(revisions => revisions.forEach(revision => saver.save(revision)))
+              .then(revisions => saver.saveTempRevisions(revisions))
               .then(() => {
                 scheduleNext(itemArray);
               })

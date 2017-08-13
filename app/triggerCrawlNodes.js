@@ -4,7 +4,7 @@
  * - http cache (rethinkdb)
  * - http delay
  * Output:
- * - data/nodes.csv: node_id, canonical, revision_id, dataset_id
+ * - nodes rethinkdb table: node_id, canonical, revision_id, dataset_id
  */
 const cheerio = require('cheerio');
 const url = require('url');

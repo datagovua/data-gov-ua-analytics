@@ -1,15 +1,17 @@
 /**
- * Input: nodeId
- * Output: nodes.csv: (node_id, canonical, revision_id, dataset_id)
+ * Input: [nodeId]
+ * Output: nodes rethinkdb table: (node_id, canonical, revision_id, dataset_id)
  */
 const cheerio = require('cheerio');
 const Promise = require('bluebird')
 
 const createRequester = require('./requester');
-const saver = require('./saver');
+const createSaver = require('./dbSaver')
 const parser = require('./parser');
 
 const requester = createRequester();
+
+let saver;
 
 function visited(nodeId) {
   return false;
@@ -44,7 +46,7 @@ function scheduleNext(nodeId, idArray, errors, resolve, reject) {
     } else {
       process.nextTick(() => {
         getNode(nodeId)
-          .then(node => saver.save(node))
+          .then(node => saver.saveNode(node))
           .then(() => {
             scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
           })
@@ -58,15 +60,13 @@ function scheduleNext(nodeId, idArray, errors, resolve, reject) {
 }
 
 module.exports = function crawlNodes(idArray) {
-
   let errors = [];
-  saver.init();
-  return requester.init().then(() => {
-
+  saver = createSaver();
+  return saver.init()
+  .then(() => requester.init())
+  .then(() => {
     return new Promise((resolve, reject) => {
       scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
     });
-
   });
-
 }

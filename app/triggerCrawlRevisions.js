@@ -9,14 +9,17 @@ const url = require('url');
 
 const crawlRevisions = require('./crawlRevisions');
 const parser = require('./parser');
-const reader = require('./reader');
+const createDbReader = require('./dbReader');
 
-function readNodesFile() {
-  return reader('/data/nodes.csv');
+let reader;
+
+function readNodes() {
+  reader = createDbReader();
+  return reader.init().then(() => reader.readNodes());
 }
 
 function getNodesToFreshen() {
-  return readNodesFile().then((nodes) => {
+  return readNodes().then((nodes) => {
     // TODO skip resource nodes with revision (resources don't change)
     return nodes;
   });
@@ -41,5 +44,6 @@ module.exports = function() {
         }
       }
     });
+    return reader.finish();
   })
 }

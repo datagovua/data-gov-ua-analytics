@@ -9,14 +9,17 @@ const url = require('url');
 
 const crawlMetadata = require('./crawlMetadata');
 const parser = require('./parser');
-const reader = require('./reader');
+const createDbReader = require('./dbReader');
 
-function readRevisionsFile() {
-  return reader('/data/revisions.csv');
+let reader;
+
+function readRevisions() {
+  reader = createDbReader();
+  return reader.init().then(() => reader.readTempRevisions());
 }
 
 function getRevisionsToFetch() {
-  return readRevisionsFile().then((revisions) => {
+  return readRevisions().then((revisions) => {
     return revisions.filter(revision => !!revision.dataset_id);
   });
 }
@@ -36,5 +39,6 @@ module.exports = function() {
         console.log(e);
       }
     });
+    return reader.finish();
   })
 }

@@ -1,4 +1,3 @@
-const mkdirp = require('mkdirp');
 const r = require('rethinkdb');
 
 class Cache {
