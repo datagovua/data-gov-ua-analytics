@@ -15,7 +15,7 @@ module.exports = function() {
     },
 
     readNodes() {
-      return r.table('nodes').orderBy('node_id').run(connection);
+      return r.table('nodes').orderBy('node_id', {index: 'node_id'}).run(connection);
     },
 
     readTempRevisions() {

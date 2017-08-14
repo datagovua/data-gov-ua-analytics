@@ -93,7 +93,24 @@ module.exports = function crawlRevisions(itemArray) {
         if(!item) {
           saver.finish()
             .then(() => requester.finish())
-            .then(() => resolve(errors));
+            .then(() => {
+              // TODO save errors
+              if(errors.length) {
+                console.log("Permanent errors:")
+              }
+              errors.forEach(function(e) {
+                if(e.statusCode !== undefined) {
+                  console.log(e.path, e.statusCode);
+                } else {
+                  if(e.path) {
+                    console.log(e.path)
+                  } else {
+                    console.log(e);
+                  }
+                }
+              });
+              resolve();
+            });
         } else if(visited(item)) {
           process.nextTick(() => scheduleNext(itemArray));
         } else {

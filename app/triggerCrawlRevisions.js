@@ -19,31 +19,18 @@ function readNodes() {
 }
 
 function getNodesToFreshen() {
-  return readNodes().then((nodes) => {
-    // TODO skip resource nodes with revision (resources don't change)
-    return nodes;
-  });
+  return readNodes();
 }
 
 module.exports = function() {
-  return getNodesToFreshen().then(nodes => {
-    return crawlRevisions(nodes);
+  return getNodesToFreshen()
+  .then(nodesCursor => {
+    return nodesCursor.eachAsync((node) => {
+      // TODO skip resource nodes with revision (resources don't change)
+      return crawlRevisions([node]);
+    })
   })
-  .then(errors => {
-    if(errors.length) {
-      console.log("Permanent errors:")
-    }
-    errors.forEach(function(e) {
-      if(e.statusCode !== undefined) {
-        console.log(e.path, e.statusCode);
-      } else {
-        if(e.path) {
-          console.log(e.path)
-        } else {
-          console.log(e);
-        }
-      }
-    });
+  .then(() => {
     return reader.finish();
   })
 }
