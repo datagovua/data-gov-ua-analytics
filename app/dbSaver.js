@@ -105,6 +105,7 @@ module.exports = function createSaver() {
         // format_dataset,
         // keywords,
         // language,
+        dataset_node_id: metadata.dataset_node_id,
       };
       if(isNaN(dataToSave.revision_id)) {
         delete dataToSave.revision_id;

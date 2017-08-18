@@ -24,7 +24,7 @@ function getMetadata(revision) {
   return fetchMetadata(revision.dataset_id, revision.revision_id)
   .then((metadata) => {
     let revisions = metadata.revisions;
-    
+    metadata.dataset_node_id = revision.node_id;
     delete metadata.revisions;
     return { metadata, revisions };
   });
@@ -34,14 +34,12 @@ module.exports = function crawlMetadata(itemArray) {
   let errors = [];
   const databaseSaver = new createSaver();
 
-//  saver.init('/data/metadata.csv');
   return databaseSaver.init().then(() => requester.init()).then(() => {
     return new Promise((resolve, reject) => {
       function scheduleNext(itemArray) {
         let item = itemArray.shift();
         if(!item) {
           databaseSaver.finish()
-//            .then(() => saver.finish())
             .then(() => requester.finish())
             .then(() => resolve(errors));
         } else if(visited(item)) {
@@ -50,12 +48,7 @@ module.exports = function crawlMetadata(itemArray) {
           process.nextTick(() => {
             return getMetadata(item)
               .then(metadata => {
-                /* save revisions */
-                //if(metadata.revisions) {
-                //  metadata.revisions.forEach(revision => saver.save(revision));
-                //}
                 return databaseSaver.saveRevisions(metadata);
-//                return saver.save(metadata.revisions);
               })
               .then(() => {
                 scheduleNext(itemArray);
