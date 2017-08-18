@@ -19,7 +19,7 @@ module.exports = function() {
     },
 
     readTempRevisions() {
-      return r.table('temp_revisions').orderBy('revision_id').run(connection);
+      return r.table('temp_revisions').orderBy({index: 'revision_id'}).run(connection);
     },
 
     finish() {

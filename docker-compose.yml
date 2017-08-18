@@ -8,6 +8,7 @@ services:
     image: 'vanuan/rethinkdb-alpine'
     ports:
       - 127.0.0.1:8080:8080
+      - 172.17.0.1:28015:28015
     volumes:
       - ./data/rethinkdb:/data
   crawler:
