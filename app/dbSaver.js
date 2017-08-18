@@ -110,6 +110,8 @@ module.exports = function createSaver() {
         delete dataToSave.revision_id;
       }
       let organization_id;
+      // files can be undefined
+      if(!metadata.files) { metadata.files = []; }
       metadata.files.forEach((file) => {
         file.revision_id = parseInt(metadata.revision_id);
         file.base_url = 'http://data.gov.ua/sites/default/files/media/';
