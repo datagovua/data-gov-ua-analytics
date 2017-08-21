@@ -34,6 +34,7 @@ module.exports = function createSaver() {
         .then(() => this.createTable('organizations', 'organization_id'))
         .then(() => this.createTable('files', 'url'))
         .then(() => this.createTable('temp_revisions', 'revision_id'))
+        .then(() => this.createTable('datasets', 'dataset_node_id'))
         .then(() => this.createTable('nodes', 'node_id'));
     },
 
@@ -72,7 +73,11 @@ module.exports = function createSaver() {
       if(!revisions || revisions.length == 0) {
         console.log('Revisions is empty, fallback to last changed');
         if(metadata.revision_id && metadata.last_revision_id === metadata.revision_id) {
-          fallbackRevisions = [{ revision_id: parseInt(metadata.revision_id), revision_created: metadata.changed }];
+          fallbackRevisions = [{
+            revision_id: parseInt(metadata.revision_id),
+            revision_created: metadata.changed,
+            dataset_node_id: metadata.dataset_node_id,
+          }];
         } else {
           console.log('no revisions, no fallback');
           return Promise.resolve();
@@ -81,6 +86,7 @@ module.exports = function createSaver() {
         revisions.forEach((rev) => {
           rev.revision_id = parseInt(rev.revision_id);
           rev.revision_created = rev.created;
+          rev.dataset_node_id = metadata.dataset_node_id;
           delete rev.created;
         });
       }
@@ -160,6 +166,10 @@ module.exports = function createSaver() {
 
     saveTempRevisions(revisions) {
       return this.saveObject('temp_revisions', revisions);
+    },
+
+    saveDataset(dataset) {
+      return this.saveObject('datasets', dataset);
     },
 
     finish() {

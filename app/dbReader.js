@@ -22,6 +22,10 @@ module.exports = function() {
       return r.table('temp_revisions').orderBy({index: 'revision_id'}).run(connection);
     },
 
+    readRevisions() {
+      return r.table('revisions').orderBy({index: 'revision_id'}).run(connection);
+    },
+
     finish() {
       return connection.close().then(() => { connection = null; });
     },
