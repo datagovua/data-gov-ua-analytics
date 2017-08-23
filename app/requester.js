@@ -28,7 +28,8 @@ class Requester {
   init(delay, cacheLocation) {
     this.cache = new Cache();
     this.retryOptions = {
-      max_tries: 30,
+      throw_original: true,
+      max_tries: 7,
       interval: delay || parseInt(process.env.DELAY) || 10000,
       max_interval: delay || parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
       backoff: 2,
