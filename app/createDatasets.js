@@ -8,9 +8,13 @@ const createDbReader = require('./dbReader');
 const createSaver = require('./dbSaver');
 
 
-function createDataset(revision, saver) {
+function createDataset(tempRevision, revision, saver) {
   console.log('processing revision ' + revision.revision_id);
-  revision.dataset_updated = revision.revision_created;
+  if(revision.revision_created) {
+    revision.dataset_updated = revision.revision_created;
+  } else {
+    revision.dataset_updated = tempRevision.date;
+  }
   delete revision.revision_created;
   delete revision.revision_id;
   return saver.saveDataset(revision);
@@ -30,11 +34,18 @@ function createDatasets() {
     .then(() => readRevisions())
     .then(revisionsCursor => {
       return revisionsCursor.eachAsync((revision) => {
-        // skip revisions without dataset_id
-        if(!revision.dataset_id) {
-          return;
-        }
-        return createDataset(revision, databaseSaver).then(() => undefined);
+        return reader.getTempRevision(revision.revision_id)
+        .then((tempRevision) => {
+          // skip revisions without dataset_id
+          if(!revision.dataset_id) {
+            return;
+          }
+          return createDataset(
+            tempRevision,
+            revision,
+            databaseSaver
+          ).then(() => undefined);
+        });
       });
     })
     .then(() => {

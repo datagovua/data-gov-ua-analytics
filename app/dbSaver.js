@@ -9,7 +9,7 @@ module.exports = function createSaver() {
     init() {
       return r
       .connect({host: 'rethinkdb', port: 28015})
-      .then((conn) => { connection = conn; console.log('connection opened') })
+      .then((conn) => { connection = conn; })
       .then(() => {
         return r
         .dbCreate(dbName)
@@ -173,7 +173,7 @@ module.exports = function createSaver() {
     },
 
     finish() {
-      return connection.close().then(() => { connection = null; console.log('connection closed') });
+      return connection.close().then(() => { connection = null; });
     }
   };
 }

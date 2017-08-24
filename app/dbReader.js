@@ -26,6 +26,10 @@ module.exports = function() {
       return r.table('revisions').orderBy({index: 'revision_id'}).run(connection);
     },
 
+    getTempRevision(revisionId) {
+      return r.table('temp_revisions').get(revisionId).run(connection);
+    },
+
     finish() {
       return connection.close().then(() => { connection = null; });
     },

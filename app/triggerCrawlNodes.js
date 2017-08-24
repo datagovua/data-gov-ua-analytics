@@ -33,6 +33,10 @@ function getMissing() {
     // TODO: open database, sort by id, get last
     // TODO: open database, get existing ids, find gaps
     let idArray = [...interval(firstKnownNode, nodeId)];
+    if(process.env.NODE_ENV !== 'production') {
+      idArray.push(2801);
+      idArray.push(7137);
+    }
     return idArray;
   });
 }
