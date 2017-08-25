@@ -16,6 +16,8 @@ const parser = require('./parser');
 let lastKnownNode = 92807;
 let firstKnownNode = 407; // 361
 const testNodeId = 420;
+const NODE_ENV = process.env.NODE_ENV.trim();
+const IS_PRODUCTION = NODE_ENV === 'production';
 
 const requester = createRequester();
 
@@ -33,7 +35,7 @@ function getMissing() {
     // TODO: open database, sort by id, get last
     // TODO: open database, get existing ids, find gaps
     let idArray = [...interval(firstKnownNode, nodeId)];
-    if(process.env.NODE_ENV !== 'production') {
+    if(!IS_PRODUCTION) {
       idArray.push(2801);
       idArray.push(7137);
     }
@@ -45,7 +47,7 @@ function fetchLastKnownId() {
   // get number of datasets
   // TODO fetch last dataset, get its node id if not known
   return requester.init().then(() => {
-    const force = process.env.NODE_ENV === 'producion';
+    const force = IS_PRODUCTION;
     return requester.request('/datasets?sort_bef_combine=created%20DESC', force)
       .then(parseDatasetId)
       .then(fetchByDatasetId)
@@ -84,7 +86,7 @@ function parseNodeId(datasetPageContent) {
     try {
       let dom = cheerio.load(datasetPageContent);
       let nodeId = parser.parseNodeId(dom);
-      resolve(process.env.NODE_ENV === 'production' ? nodeId : testNodeId);
+      resolve(IS_PRODUCTION ? nodeId : testNodeId);
     } catch(e) {
       reject(e);
     }
