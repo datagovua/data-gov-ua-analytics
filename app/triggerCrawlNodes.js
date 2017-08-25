@@ -45,7 +45,8 @@ function fetchLastKnownId() {
   // get number of datasets
   // TODO fetch last dataset, get its node id if not known
   return requester.init().then(() => {
-    return requester.request('/datasets?sort_bef_combine=created%20DESC')
+    const force = process.env.NODE_ENV === 'producion';
+    return requester.request('/datasets?sort_bef_combine=created%20DESC', force)
       .then(parseDatasetId)
       .then(fetchByDatasetId)
       .then(parseNodeId);

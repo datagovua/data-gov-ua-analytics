@@ -40,7 +40,33 @@ class Requester {
     return this.cache.init();
   }
 
-  request(path) {
+  requestLive(path) {
+    console.log(path + ' live');
+    return delay(DELAY).then(() => {
+      return retry(() => { return request(domain + path); }, this.retryOptions)
+    })
+    .then((content) => {
+      return this.cache.save(path, { content, statusCode: 200 })
+      .then(() => {
+        return content;
+      });
+    })
+    .catch(e => {
+      if(!e.response) throw e;
+      return this.cache.save(path, {
+        content: e.response.body,
+        statusCode: e.response.statusCode,
+      })
+      .then(() => {
+        throw { path, content: e.response.body, statusCode: e.response.statusCode };
+      });
+    });
+  }
+
+  request(path, force) {
+    if(force) {
+      return this.requestLive(path);
+    }
     return this.cache.retrieve(path).then((response) => {
       if(response) {
         console.log(path + ' from cache');
@@ -54,26 +80,7 @@ class Requester {
           };
         }
       } else {
-        console.log(path + ' live');
-        return delay(DELAY).then(() => {
-          return retry(() => { return request(domain + path); }, this.retryOptions)
-        })
-        .then((content) => {
-          return this.cache.save(path, { content, statusCode: 200 })
-          .then(() => {
-            return content;
-          });
-        })
-        .catch(e => {
-          if(!e.response) throw e;
-          return this.cache.save(path, {
-            content: e.response.body,
-            statusCode: e.response.statusCode,
-          })
-          .then(() => {
-            throw { path, content: e.response.body, statusCode: e.response.statusCode };
-          });
-        });
+        return this.requestLive(path)
       }
     });
   }
