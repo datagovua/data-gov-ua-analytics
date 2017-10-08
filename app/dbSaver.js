@@ -52,6 +52,7 @@ module.exports = function createSaver() {
     createIndexes() {
       return this.createIndex('revisions', 'node_id')
         .then(() => this.createIndex('revisions', 'organization_id'))
+        .then(() => this.createIndex('nodes', 'file_url'))
         .then(() => this.createIndex('files', 'revision_id'))
     },
 
@@ -121,8 +122,9 @@ module.exports = function createSaver() {
       if(!metadata.files) { metadata.files = []; }
       metadata.files.forEach((file) => {
         file.revision_id = parseInt(metadata.revision_id);
-        file.base_url = 'http://data.gov.ua/sites/default/files/media/';
-        file.url = file.url.replace(file.base_url, '');
+        if(file.url) {
+          this.setBaseUrl(file, 'url');
+        }
         organization_id = file.url.match(/(?:document|image)\/(\d+)\//);
         if(!organization_id) {
           throw 'file without organization id: ' + file.url;
@@ -159,8 +161,16 @@ module.exports = function createSaver() {
       return this.saveObject('files', files);
     },
 
+    setBaseUrl(obj, urlFieldName) {
+      obj.base_url = 'http://data.gov.ua/sites/default/files/media/';
+      obj[urlFieldName] = obj[urlFieldName].replace(obj.base_url, '');
+    },
+
     saveNode(node) {
       node.revision_id = null;
+      if(node.file_url) {
+        this.setBaseUrl(node, 'file_url')
+      }
       return this.saveObject('nodes', node);
     },
 

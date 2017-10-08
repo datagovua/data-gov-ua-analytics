@@ -26,6 +26,7 @@ function getNode(nodeId) {
       canonical: parser.parseCanonical(dom),
       revision_id: parser.parseRevisionId(dom),
       dataset_id: parser.parseDatasetId(dom),
+      file_url: parser.parseResourceUrl(dom),
     }));
 }
 

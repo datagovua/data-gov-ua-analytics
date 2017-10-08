@@ -73,6 +73,10 @@ function parseRevisionId(dom) {
   }).text());
 }
 
+function parseResourceUrl(dom) {
+  return dom('div.download > a').attr('href') || null;
+}
+
 module.exports = {
   pagesCount,
   datasetIds,
@@ -80,4 +84,5 @@ module.exports = {
   parseNodeId,
   parseDatasetId,
   parseCanonical,
+  parseResourceUrl,
 }
