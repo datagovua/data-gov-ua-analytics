@@ -11,6 +11,8 @@ const parser = require('./parser');
 
 const requester = createRequester();
 
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',').map((i) => parseInt(i, 10));
+
 let saver;
 
 function visited(node) {
@@ -55,11 +57,13 @@ function parseRevisions(dom, node) {
   return { revisions: revisions, hasNext: hasNext };
 }
 
-function getRevisionsPage(node, page) {
-  return requester.request(`/views/ajax?view_name=revision_dataset_views&view_args=${node.node_id}&view_display_id=block_2&page=${page}`)
-  .then(res => JSON.parse(res))
-  .then(json => cheerio.load(json[1].data))
-  .then(dom => parseRevisions(dom, node));
+async function getRevisionsPage(node, page) {
+  const force = !!ONLY_NODES;
+  const res = await requester.request(`/views/ajax?view_name=revision_dataset_views&view_args=${node.node_id}&view_display_id=block_2&page=${page}`, force);
+  const json = JSON.parse(res);
+  const dom = cheerio.load(json[1].data);
+  const revisions = parseRevisions(dom, node);
+  return revisions;
 }
 
 function getRevisions(node) {
