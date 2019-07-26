@@ -11,7 +11,7 @@ const crawlMetadata = require('./crawlMetadata');
 const parser = require('./parser');
 const createDbReader = require('./dbReader');
 
-const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',');
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',').map((i) => parseInt(i, 10));
 
 module.exports = function() {
   let reader;

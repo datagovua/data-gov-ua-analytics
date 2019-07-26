@@ -17,7 +17,7 @@ const parser = require('./parser');
 let lastKnownNode = 92807;
 let firstKnownNode = 407; // 361
 const testNodeId = 463;
-const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',');
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',').map((i) => parseInt(i, 10));
 const NODE_ENV = process.env.NODE_ENV.trim();
 const IS_PRODUCTION = NODE_ENV === 'production';
 

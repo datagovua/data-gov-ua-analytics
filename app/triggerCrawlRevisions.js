@@ -12,18 +12,20 @@ const parser = require('./parser');
 const createDbReader = require('./dbReader');
 
 let reader;
-let ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',')
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',').map((i) => parseInt(i, 10));
 
-function readNodes(onlyNodes) {
+async function readNodes(onlyNodes) {
   reader = createDbReader();
-  return reader.init().then(() => reader.readNodes(onlyNodes));
+  await reader.init();
+  return reader.readNodes(onlyNodes);
 }
 
 async function getNodesToFreshen() {
   if (ONLY_NODES) {
     return readNodes(ONLY_NODES);
+  } else {
+    return readNodes();
   }
-  return readNodes();
 }
 
 module.exports = function() {
