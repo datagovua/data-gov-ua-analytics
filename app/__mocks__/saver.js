@@ -1,7 +1,7 @@
 module.exports = {
   init() {
   },
-  save: jest.fn(),
+  saveNode: jest.fn(),
   finish() {
     return new Promise(resolve => resolve());
   }

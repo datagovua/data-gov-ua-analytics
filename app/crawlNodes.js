@@ -6,7 +6,6 @@ const cheerio = require('cheerio');
 const Promise = require('bluebird')
 
 const createRequester = require('./requester');
-const createSaver = require('./dbSaver')
 const parser = require('./parser');
 
 const requester = createRequester();
@@ -38,7 +37,7 @@ function delay(timeout) {
 
 function scheduleNext(nodeId, idArray, errors, resolve, reject) {
   delay(1).then(() => {
-    if(!nodeId) {
+    if(!nodeId) { // if nodeId is null then idArray is empty
       saver.finish()
         .then(() => requester.finish())
         .then(() => resolve(errors));
@@ -47,7 +46,7 @@ function scheduleNext(nodeId, idArray, errors, resolve, reject) {
     } else {
       process.nextTick(() => {
         getNode(nodeId)
-          .then(node => saver.saveNode(node))
+          .then(node => { return saver.saveNode(node); })
           .then(() => {
             scheduleNext(idArray.pop(), idArray, errors, resolve, reject);
           })
@@ -60,9 +59,9 @@ function scheduleNext(nodeId, idArray, errors, resolve, reject) {
   });
 }
 
-module.exports = function crawlNodes(idArray) {
+module.exports = function crawlNodes(outputSaver, idArray) {
   let errors = [];
-  saver = createSaver();
+  saver = outputSaver;
   return saver.init()
   .then(() => requester.init())
   .then(() => {

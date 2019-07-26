@@ -49,11 +49,12 @@ module.exports = function createSaver() {
         })
     },
 
-    createIndexes() {
-      return this.createIndex('revisions', 'node_id')
-        .then(() => this.createIndex('revisions', 'organization_id'))
-        .then(() => this.createIndex('nodes', 'file_url'))
-        .then(() => this.createIndex('files', 'revision_id'))
+    async createIndexes() {
+      await this.createIndex('revisions', 'node_id');
+      await this.createIndex('revisions', 'organization_id');
+      await this.createIndex('temp_revisions', 'node_id');
+      await this.createIndex('nodes', 'file_url');
+      await this.createIndex('files', 'revision_id');
     },
 
     createIndex(tableName, indexName) {
@@ -161,8 +162,15 @@ module.exports = function createSaver() {
       return this.saveObject('files', files);
     },
 
+    saveFile(file, revision_id) {
+      const { created, url } = file;
+      const fileToSave = { revision_id, created, url };
+      this.setBaseUrl(fileToSave, 'url');
+      return this.saveObject('files', fileToSave);
+    },
+
     setBaseUrl(obj, urlFieldName) {
-      obj.base_url = 'http://data.gov.ua/sites/default/files/media/';
+      obj.base_url = 'http://old.data.gov.ua/sites/default/files/media/';
       obj[urlFieldName] = obj[urlFieldName].replace(obj.base_url, '');
     },
 

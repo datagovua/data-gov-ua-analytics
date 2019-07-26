@@ -10,7 +10,7 @@ const DELAY = parseInt(process.env.DELAY);
 if(proxy) {
   request = request.defaults({'proxy': proxy})
 }
-const domain = 'http://data.gov.ua';
+const domain = 'http://old.data.gov.ua';
 
 module.exports = function() {
   return new Requester();
@@ -25,13 +25,14 @@ class Requester {
   constructor() {
   }
 
-  init(delay, cacheLocation) {
+  init(delayMs, cacheLocation) {
+    this.delayMs = delayMs || DELAY;
     this.cache = new Cache();
     this.retryOptions = {
       throw_original: true,
       max_tries: 7,
-      interval: delay || parseInt(process.env.DELAY) || 10000,
-      max_interval: delay || parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
+      interval: delayMs || parseInt(process.env.DELAY) || 10000,
+      max_interval: delayMs || parseInt(process.env.DELAY) || 15 * 60 * 1000, // 15 mins
       backoff: 2,
       predicate: e => e instanceof rpErrors.RequestError
         || (e instanceof rpErrors.StatusCodeError &&
@@ -41,8 +42,9 @@ class Requester {
   }
 
   requestLive(path) {
-    console.log(path + ' live');
-    return delay(DELAY).then(() => {
+    if(!path) throw 'Path should be string';
+    console.log(domain + path + ' live');
+    return delay(this.delayMs).then(() => {
       return retry(() => { return request(domain + path); }, this.retryOptions)
     })
     .then((content) => {
@@ -63,7 +65,7 @@ class Requester {
     });
   }
 
-  request(path, force) {
+  async request(path, force) {
     if(force) {
       return this.requestLive(path);
     }

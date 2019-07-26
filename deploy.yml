@@ -30,9 +30,9 @@ services:
           memory: 700M
         reservations:
           memory: 700M
-  uploader:
-    image: vanuan/data-gov-ua-mirror
-    environment:
-      CKAN_URL: 'http://mirror.data-gov-ua.org'
-      CKAN_API_TOKEN: 'REPLACE THIS'
-      RETHINKDB: 'rethinkdb'
+#  uploader:
+#    image: vanuan/data-gov-ua-mirror
+#    environment:
+#      CKAN_URL: 'http://mirror.data-gov-ua.org'
+#      CKAN_API_TOKEN: 'REPLACE THIS'
+#      RETHINKDB: 'rethinkdb'

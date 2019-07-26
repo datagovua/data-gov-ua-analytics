@@ -11,13 +11,14 @@ const crawlMetadata = require('./crawlMetadata');
 const parser = require('./parser');
 const createDbReader = require('./dbReader');
 
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',');
 
 module.exports = function() {
   let reader;
 
   function readRevisions() {
     reader = createDbReader();
-    return reader.init().then(() => reader.readTempRevisions());
+    return reader.init().then(() => reader.readTempRevisions(ONLY_NODES));
   }
 
   return readRevisions()

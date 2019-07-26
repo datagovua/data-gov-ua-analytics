@@ -12,13 +12,17 @@ const parser = require('./parser');
 const createDbReader = require('./dbReader');
 
 let reader;
+let ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',')
 
-function readNodes() {
+function readNodes(onlyNodes) {
   reader = createDbReader();
-  return reader.init().then(() => reader.readNodes());
+  return reader.init().then(() => reader.readNodes(onlyNodes));
 }
 
-function getNodesToFreshen() {
+async function getNodesToFreshen() {
+  if (ONLY_NODES) {
+    return readNodes(ONLY_NODES);
+  }
   return readNodes();
 }
 

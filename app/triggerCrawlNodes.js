@@ -9,13 +9,15 @@
 const cheerio = require('cheerio');
 const url = require('url');
 
+const createSaver = require('./dbSaver')
 const crawlNodes = require('./crawlNodes');
 const createRequester = require('./requester');
 const parser = require('./parser');
 
 let lastKnownNode = 92807;
 let firstKnownNode = 407; // 361
-const testNodeId = 420;
+const testNodeId = 463;
+const ONLY_NODES = process.env.ONLY_NODES && process.env.ONLY_NODES.split(',');
 const NODE_ENV = process.env.NODE_ENV.trim();
 const IS_PRODUCTION = NODE_ENV === 'production';
 
@@ -30,29 +32,40 @@ function* interval(min, max) {
   }
 }
 
-function getMissing() {
-  return fetchLastKnownId().then((nodeId) => {
-    // TODO: open database, sort by id, get last
-    // TODO: open database, get existing ids, find gaps
-    let idArray = [...interval(firstKnownNode, nodeId)];
-    if(!IS_PRODUCTION) {
-      idArray.push(2801);
-      idArray.push(7137);
-    }
-    return idArray;
-  });
+async function findGaps(firstNodeId, lastNodeId) {
+  // TODO: open database, sort by id, get last
+  // TODO: open database, get existing ids, find gaps
+  let idArray = [...interval(firstNodeId, lastNodeId)];
+  return idArray;
 }
 
-function fetchLastKnownId() {
+async function getMissingNodes() {
+  let idArray = [];
+  if(ONLY_NODES) {
+    return ONLY_NODES;
+  }
+  if(!IS_PRODUCTION) {
+    // EDR = 6218
+    // idArray.push(463);
+    //idArray.push(2801);
+    //idArray.push(7137);
+    idArray.push(6218);
+    return idArray;
+  }
+  const lastNodeId = await fetchLastKnownId();
+  const firstNodeId = firstKnownNode;
+  idArray = await findGaps(firstNodeId, lastNodeId);
+  return idArray;
+}
+
+async function fetchLastKnownId() {
   // get number of datasets
   // TODO fetch last dataset, get its node id if not known
-  return requester.init().then(() => {
-    const force = IS_PRODUCTION;
-    return requester.request('/datasets?sort_bef_combine=created%20DESC', force)
-      .then(parseDatasetId)
-      .then(fetchByDatasetId)
-      .then(parseNodeId);
-  });
+  const force = true;
+  const datasetsPageContent = await requester.request('/datasets?sort_bef_combine=created%20DESC', force);
+  const datasetId = await parseDatasetId(datasetsPageContent);
+  const datasetPageContent = await fetchByDatasetId(datasetId);
+  return await parseNodeId(datasetPageContent);
 }
 
 function parseDatasetId(pageContent) {
@@ -86,28 +99,29 @@ function parseNodeId(datasetPageContent) {
     try {
       let dom = cheerio.load(datasetPageContent);
       let nodeId = parser.parseNodeId(dom);
-      resolve(IS_PRODUCTION ? nodeId : testNodeId);
+      resolve(nodeId);
     } catch(e) {
       reject(e);
     }
   });
 }
 
-module.exports = function () {
-  return getMissing().then(nodeIds => {
-    requester.finish();
-    return crawlNodes(nodeIds);
-  })
-  .then(errors => {
-    if(errors.length) {
-      console.log("Permanent errors:")
+let dbSaver;
+
+module.exports = async function () {
+  dbSaver = createSaver();
+  await requester.init();
+  const nodeIds = await getMissingNodes();
+  requester.finish();
+  const errors = await crawlNodes(dbSaver, nodeIds);
+  if(errors.length) {
+    console.log("Permanent errors:")
+  }
+  errors.forEach(function(e) {
+    if(e.statusCode !== undefined) {
+      console.log(e.path, e.statusCode);
+    } else {
+      console.log(e);
     }
-    errors.forEach(function(e) {
-      if(e.statusCode !== undefined) {
-        console.log(e.path, e.statusCode);
-      } else {
-        console.log(e);
-      }
-    });
-  })
+  });
 }

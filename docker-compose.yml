@@ -27,36 +27,37 @@ services:
       - DELAY=1000
       - CONCURRENCY=1
       - NODE_ENV=$NODE_ENV
+      - ONLY_NODES=6218
     ports:
       - "127.0.0.1:9229:9229"
       - "127.0.0.1:9222:9222"
     expose:
       - "9229"
       - "9222"
-  elasticsearch:
-    image: elasticsearch:5.1.1
-    ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch_config:/usr/share/elasticsearch/config
-      - elasticsearch_data:/usr/share/elasticsearch/data
-  logstash:
-    image: logstash:5.1.1
-    volumes:
-      - ./logstash:/crawler/logstash
-      - ./data:/crawler/data
-    command: bash -c "env GEM_HOME=/usr/share/logstash/vendor/bundle/jruby/1.9 /usr/share/logstash/vendor/jruby/bin/jruby -S gem install geocoder -v 1.4.1 && echo 'gem \"geocoder\", \"~> 1.4.1\"' >> /usr/share/logstash/Gemfile && logstash -f /crawler/logstash/metadata.conf"
-    depends_on:
-      - elasticsearch
-  kibana:
-    image: kibana:5.1.1
-    ports:
-      - "5601:5601"
-    volumes:
-      - kibana_config:/etc/kibana/
-    depends_on:
-      - elasticsearch
-volumes:
-  elasticsearch_config: {}
-  elasticsearch_data: {}
-  kibana_config: {}
+#  elasticsearch:
+#    image: elasticsearch:5.1.1
+#    ports:
+#      - "9200:9200"
+#    volumes:
+#      - elasticsearch_config:/usr/share/elasticsearch/config
+#      - elasticsearch_data:/usr/share/elasticsearch/data
+#  logstash:
+#    image: logstash:5.1.1
+#    volumes:
+#      - ./logstash:/crawler/logstash
+#      - ./data:/crawler/data
+#    command: bash -c "env GEM_HOME=/usr/share/logstash/vendor/bundle/jruby/1.9 /usr/share/logstash/vendor/jruby/bin/jruby -S gem install geocoder -v 1.4.1 && echo 'gem \"geocoder\", \"~> 1.4.1\"' >> /usr/share/logstash/Gemfile && logstash -f /crawler/logstash/metadata.conf"
+#    depends_on:
+#      - elasticsearch
+#  kibana:
+#    image: kibana:5.1.1
+#    ports:
+#      - "5601:5601"
+#    volumes:
+#      - kibana_config:/etc/kibana/
+#    depends_on:
+#      - elasticsearch
+#volumes:
+#  elasticsearch_config: {}
+#  elasticsearch_data: {}
+#  kibana_config: {}
