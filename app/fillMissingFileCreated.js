@@ -23,14 +23,16 @@ module.exports = async function() {
   const saver = createDbSaver();
   const requester = createRequester();
 
-  async function readFilesWithoutCreated() {
-    return reader.init().then(() => reader.readFilesWithoutCreated());
+  function readFilesWithoutCreated() {
+    return reader.readFilesWithoutCreated();
   }
 
   function writeFileCreated(file, revision_id) {
-    return saver.init().then(() => saver.saveFile(file, revision_id));
+    return saver.saveFile(file, revision_id);
   }
 
+  await reader.init();
+  await saver.init();
   await requester.init();
   const filesCursor = await readFilesWithoutCreated();
   await filesCursor.eachAsync(async (fileMetadata) => {

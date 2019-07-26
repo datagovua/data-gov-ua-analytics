@@ -100,7 +100,7 @@ module.exports = function createSaver() {
         .then(() => this.saveRevisionMetadata(metadata));
     },
 
-    saveRevisionMetadata(metadata) {
+    async saveRevisionMetadata(metadata) {
       let dataToSave = {
         revision_id: parseInt(metadata.revision_id),
         dataset_id: metadata.dataset_id,
@@ -120,7 +120,11 @@ module.exports = function createSaver() {
       }
       let organization_id;
       // files can be undefined
-      if(!metadata.files) { metadata.files = []; }
+      if(!metadata.files) {
+        // we can't deduce organization id
+        return;
+      }
+
       metadata.files.forEach((file) => {
         file.revision_id = parseInt(metadata.revision_id);
         if(file.url) {
@@ -128,7 +132,7 @@ module.exports = function createSaver() {
         }
         organization_id = file.url.match(/(?:document|image)\/(\d+)\//);
         if(!organization_id) {
-          throw 'file without organization id: ' + file.url;
+          throw new Error('file without organization id: ' + file.url);
         } else {
           organization_id = parseInt(organization_id[1]);
           if(organization_id === 1) {
