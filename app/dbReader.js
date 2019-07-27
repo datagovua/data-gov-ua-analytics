@@ -26,8 +26,21 @@ module.exports = function() {
 
     readFilesWithoutCreated() {
       return r.table('nodes').innerJoin(r.table('files'), function(nodesRow, filesRow) {
-        return filesRow('url').eq(nodesRow('file_url')).and(filesRow.hasFields('revision_id')).and(filesRow.hasFields('created').not())
+        return nodesRow.hasFields('file_url').and(filesRow('url').eq(nodesRow('file_url'))).and(filesRow.hasFields('revision_id')).and(filesRow.hasFields('created').not())
       }).zip().orderBy('node_id').run(connection);
+    },
+
+    readMetadata(dataset_node_ids) {
+      return r.table('datasets').getAll(r.args(dataset_node_ids), {index: 'dataset_node_id'})
+        .innerJoin(r.table('revisions'), function(datasetsRow, revisionsRow) {
+          return datasetsRow('dataset_node_id').eq(revisionsRow('dataset_node_id'))
+        })
+        .zip()
+        .innerJoin(r.table('files'), function(revisionsRow, filesRow) {
+          return revisionsRow('revision_id').eq(filesRow('revision_id'))
+        })
+        .zip()
+        .orderBy('revision_id').run(connection)
     },
 
     readTempRevisions(onlyNodes) {

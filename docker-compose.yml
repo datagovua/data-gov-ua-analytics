@@ -27,7 +27,7 @@ services:
       - DELAY=1000
       - CONCURRENCY=1
       - NODE_ENV=$NODE_ENV
-      - ONLY_NODES=6218
+      - ONLY_NODES=4453,6218
     ports:
       - "127.0.0.1:9229:9229"
       - "127.0.0.1:9222:9222"
